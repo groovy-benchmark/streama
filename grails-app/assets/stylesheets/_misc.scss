@@ -1,0 +1,82 @@
+.tab-pane{
+  padding: 10px;
+  border: 1px solid #222;
+  margin-bottom: 20px;
+}
+
+
+.btn.button-icon{
+  i{
+    margin-left: 10px;
+    line-height: 0;
+    position: relative;
+    top: 3px;
+    margin-right: 10px;
+  }
+}
+
+.form-horizontal .control-label{
+  text-align: left;
+}
+
+.pagination>.disabled>span, .pagination>.disabled>span:hover, .pagination>.disabled>span:focus, .pagination>.disabled>a, .pagination>.disabled>a:hover, .pagination>.disabled>a:focus{
+  background-color: $grey-blue;
+}
+.pagination>li>a, .pagination>li>span{
+  background-color: darken($primary, 40%);
+
+  &:hover{
+    background-color: $secondary;
+  }
+}
+
+.pagination>.active>a, .pagination>.active>span, .pagination>.active>a:hover, .pagination>.active>span:hover, .pagination>.active>a:focus, .pagination>.active>span:focus{
+  background-color: darken($primary, 50%);
+}
+
+streama-wysiwyg{
+  display: block;
+  background: rgba(255, 255, 255, 0.07);
+}
+.ql-bubble .ql-tooltip {
+  z-index: 999;
+}
+
+.hide-overflowing-name{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width: 500px;
+  white-space: nowrap;
+}
+
+.text-max-width-375{
+  max-width: 375px;
+}
+
+#flexible-control-buttons{
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px;
+}
+
+.management-btn{
+  margin-left: 3px;
+}
+
+.align-label-with-subtitle-count{
+  text-align: left;
+  padding-left: 5px;
+}
+
+.align-th-action{
+  width: 235px;
+  text-align: center;
+}
+
+#checkSearchByHash{
+  padding-left: 30px;
+}
+
+.padding-btn-close{
+  padding-right: 3px;
+}

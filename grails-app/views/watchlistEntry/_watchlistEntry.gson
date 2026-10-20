@@ -1,0 +1,61 @@
+package watchlistEntry
+
+import streama.Episode
+import streama.GenericVideo
+import streama.Movie
+import streama.TvShow
+import streama.WatchlistEntry
+
+model {
+  WatchlistEntry watchlistEntry
+}
+
+json g.render(watchlistEntry, [deep:true, includes: ['id', 'dateCreated', 'lastUpdated']]){
+  if (watchlistEntry.video) {
+    video {
+      id watchlistEntry.video.id
+      title watchlistEntry.video.getTitle()
+
+      if (watchlistEntry.video instanceof Movie) {
+        Movie movie = watchlistEntry.video as Movie
+
+        mediaType 'movie'
+        release_date movie.release_date
+        poster_path movie.getPosterPath()
+        backdrop_path movie.backdrop_path
+        poster_image_src movie.poster_image?.src
+        inWatchlist movie.inWatchlist()
+      }
+      if (watchlistEntry.video instanceof GenericVideo) {
+        GenericVideo genericVideo = watchlistEntry.video as GenericVideo
+
+        mediaType 'genericVideo'
+        release_date genericVideo.release_date
+        poster_path genericVideo.getPosterPath()
+        poster_image_src genericVideo.poster_image?.src
+        inWatchlist genericVideo.inWatchlist()
+      }
+      if (watchlistEntry.video instanceof Episode) {
+        Episode episode = watchlistEntry.video as Episode
+
+        mediaType 'episode'
+        poster_path episode.getPosterPath()
+        poster_image_src episode.getPosterPath()
+        inWatchlist episode.inWatchlist()
+      }
+    }
+  }
+  if(watchlistEntry.tvShow){
+    tvShow{
+      TvShow tvShow = watchlistEntry.tvShow as TvShow
+      id tvShow.id
+      name tvShow.name
+
+      poster_path tvShow.getPosterPath()
+      poster_image_src tvShow.poster_image?.src
+      episodesWithFilesCount tvShow.getFilteredEpisodes().findAll{it.files}.size()
+      episodesCount tvShow.getFilteredEpisodes().size()
+      inWatchlist tvShow.inWatchlist()
+    }
+  }
+}
