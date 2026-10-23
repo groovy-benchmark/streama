@@ -3,7 +3,7 @@ package streama
 class InviteController {
 
     def mailService
-    def grailsApplication
+    grails.core.GrailsApplication grailsApplication
 
     def index(){
     }
