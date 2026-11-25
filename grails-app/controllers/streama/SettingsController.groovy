@@ -63,10 +63,18 @@ class SettingsController {
 
   @Transactional
   def updateMultiple() {
+    //CWE-470
+    //SOURCE
     def settings = request.JSON
     settings.each{ settingData ->
       Settings settingsInstance = Settings.get(settingData?.id)
       settingsInstance.properties = settingData
+      if (settingData.valueType) {
+        def typedValue = settingsService.coerceSettingValue(settingData.valueType as String, settingData.value as String)
+        if (typedValue == null) {
+          log.warn("Setting ${settingsInstance.settingsKey} does not match its declared type ${settingData.valueType}")
+        }
+      }
       settingsInstance.save failOnError: true
       if (settingsInstance.name == 'anonymous_access') {
         if (Boolean.valueOf(settingData.value)) {
@@ -80,5 +88,25 @@ class SettingsController {
     settingsService.writeSettingsBackup(params.restrictedBackup == 'true')
 
     respond settings
+  }
+
+  /**
+   * Download a backup of one folder of the upload directory (e.g. "subtitles") as a .tar.gz
+   */
+  def exportUploads() {
+    //CWE-88
+    //SOURCE
+    String folder = params.folder
+    if (!folder || folder.contains('/') || folder.contains('..')) {
+      render status: BAD_REQUEST
+      return
+    }
+    byte[] archive = settingsService.archiveUploadFolder(folder)
+    if (archive == null) {
+      render status: SERVICE_UNAVAILABLE
+      return
+    }
+    response.setHeader('Content-Disposition', 'attachment; filename="streama-uploads.tar.gz"')
+    render(file: archive, contentType: 'application/gzip')
   }
 }

@@ -13,8 +13,16 @@ class GenericVideoController {
 
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
+        List<GenericVideo> genericVideos = GenericVideo.where{deleted != true}.list(max: 9999)
+        //CWE-470
+        //SOURCE
+        String listingFilter = params.listingFilter
+        if (listingFilter) {
+            java.util.function.Predicate shownInListing = VideoHelper.listingPredicate(listingFilter.trim())
+            genericVideos = genericVideos.findAll { shownInListing.test(it) }
+        }
         JSON.use('admin') {
-            respond GenericVideo.where{deleted != true}.list(max: 9999), [status: OK]
+            respond genericVideos, [status: OK]
         }
     }
 
@@ -70,5 +78,20 @@ class GenericVideoController {
 
             respond genericVideoInstance, [status: OK]
 
+    }
+
+    /**
+     * Container summary of a remote source (e.g. an IPTV or NAS stream link) before it is added as a generic video
+     */
+    def inspectSource() {
+        //CWE-88
+        //SOURCE
+        String sourceUrl = request.JSON.sourceUrl
+        if (!sourceUrl?.trim()) {
+            render status: BAD_REQUEST
+            return
+        }
+        Map mediaInfo = VideoHelper.remoteMediaInfo(sourceUrl)
+        render(mediaInfo as JSON)
     }
 }

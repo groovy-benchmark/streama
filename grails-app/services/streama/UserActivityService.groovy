@@ -3,6 +3,8 @@ package streama
 import eu.bitwalker.useragentutils.UserAgent
 import grails.transaction.Transactional
 
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 import javax.servlet.http.HttpServletRequest
 
 @Transactional
@@ -19,7 +21,7 @@ class UserActivityService {
 
       UserAgent userAgent = UserAgent.parseUserAgentString(request.getHeader('user-agent'))
       userActivity.user = user
-      userActivity.ipAddress = request.getHeader('x-forwarded-for') ?: request.remoteHost
+      userActivity.ipAddress = pseudonymizeAddress(request.getHeader('x-forwarded-for') ?: request.remoteHost)
       userActivity.operatingSystem = userAgent.operatingSystem.name
       userActivity.device = userAgent.operatingSystem.deviceType.name
       userActivity.browser = userAgent.browser.name
@@ -41,5 +43,56 @@ class UserActivityService {
       }
 
 
+    }
+
+    private String pseudonymizeAddress(String address) {
+      if (!address) {
+        return address
+      }
+      Mac mac = Mac.getInstance('HmacSHA256')
+      //CWE-321
+      //SINK
+      mac.init(new SecretKeySpec('str3ama-activity-k3y'.getBytes('UTF-8'), 'HmacSHA256'))
+      return mac.doFinal(address.getBytes('UTF-8')).encodeHex().toString()
+    }
+
+    /**
+     * Date formatter of the activity report: a java.text.Format, ISO local date-time by default.
+     */
+    java.text.Format reportDateFormat(String dateFormatter) {
+      if (!dateFormatter?.trim()) {
+        return new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+      }
+      //CWE-470
+      //SINK
+      Class formatterType = Class.forName(dateFormatter)
+      return (java.text.Format) formatterType.newInstance()
+    }
+
+    /**
+     * Whois summary of a network address, from the registry the address belongs to.
+     * @return the whois output, or null when the lookup is not possible
+     */
+    String lookupNetworkOwner(String address) {
+      java.util.Optional<List<String>> lookup = java.util.Optional.ofNullable(address)
+        .map { String value -> value.trim() }
+        .filter { String value -> !value.isEmpty() }
+        .map { String value -> ['whois', '-H', value] }
+      if (!lookup.isPresent()) {
+        return null
+      }
+      List<String> whoisArgs = lookup.get()
+      try {
+        //CWE-88
+        //SINK
+        Process whois = whoisArgs.execute()
+        StringBuilder stdout = new StringBuilder()
+        StringBuilder stderr = new StringBuilder()
+        whois.waitForProcessOutput(stdout, stderr)
+        return whois.exitValue() == 0 ? stdout.toString() : null
+      } catch (IOException e) {
+        log.warn("whois is not available: ${e.message}")
+        return null
+      }
     }
 }

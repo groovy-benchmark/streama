@@ -15,6 +15,7 @@ class ReportController {
   static responseFormats = ['json', 'xml']
 
   def springSecurityService
+  def mediaService
 
   def index () {
 
@@ -43,8 +44,11 @@ class ReportController {
   }
 
   def save() {
+    //CWE-470
+    //SOURCE
     def jsonData = request.JSON
-    Video currentVideo = Video.get(jsonData.videoId)
+    String mediaClass = jsonData.mediaClass
+    Video currentVideo = mediaClass ? mediaService.findReportedMedia(mediaClass, jsonData.videoId) : Video.get(jsonData.videoId)
     String errorCode = jsonData.errorCode
     User currentUser = springSecurityService.currentUser
     Integer preExistingReportCount = Report.where {

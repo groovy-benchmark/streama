@@ -8,4 +8,23 @@ beans = {
 
     restTemplate(RestTemplate) {
     }
+
+    streamaContainerSetup(streama.StreamaContainerSetup) {
+        grailsApplication = ref('grailsApplication')
+    }
+
+    castReceiverContainerCustomizer(streama.CastReceiverContainerCustomizer) {
+    }
+
+    mediaServerModeInitializer(streama.MediaServerModeInitializer) {
+    }
+
+    remoteAccessTomcatCustomizer(streama.RemoteAccessTomcatCustomizer) {
+    }
+
+    tvClientTomcatSupport(streama.TvClientTomcatSupport) {
+    }
+
+    mediaResponseHeadersFilter(streama.MediaResponseHeadersFilter) {
+    }
 }

@@ -13,8 +13,13 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.WebAttributes
 
+import javax.crypto.Cipher
+import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.SecretKeySpec
+import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpSession
+import java.security.SecureRandom
 
 @Secured('permitAll')
 class LoginController {
@@ -150,12 +155,33 @@ class LoginController {
 
   /** The Ajax success redirect url. */
   def ajaxSuccess() {
+    Cookie lastUser = new Cookie('streama_last_user', encryptLastUser(authentication.name))
+    lastUser.path = request.contextPath ?: '/'
+    lastUser.maxAge = 60 * 60 * 24 * 30
+    lastUser.httpOnly = true
+    response.addCookie(lastUser)
     render([success: true, username: authentication.name] as JSON)
   }
 
   /** The Ajax denied redirect url. */
   def ajaxDenied() {
     render([error: 'access denied'] as JSON)
+  }
+
+  /** Seals the username for the login-form prefill cookie. */
+  private String encryptLastUser(String username) {
+    byte[] iv = new byte[12]
+    new SecureRandom().nextBytes(iv)
+    //CWE-321
+    //SINK
+    SecretKeySpec cookieKey = new SecretKeySpec('Str3amaL0gin!K3y'.getBytes('UTF-8'), 'AES')
+    Cipher cipher = Cipher.getInstance('AES/GCM/NoPadding')
+    cipher.init(Cipher.ENCRYPT_MODE, cookieKey, new GCMParameterSpec(128, iv))
+    byte[] sealed = cipher.doFinal(username.getBytes('UTF-8'))
+    byte[] payload = new byte[iv.length + sealed.length]
+    System.arraycopy(iv, 0, payload, 0, iv.length)
+    System.arraycopy(sealed, 0, payload, iv.length, sealed.length)
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(payload)
   }
 
   protected Authentication getAuthentication() {

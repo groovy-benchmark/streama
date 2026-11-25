@@ -293,7 +293,8 @@ class TheMovieDbService {
   }
 
   @Transactional
-  def refreshData(instance, path, String localFileProperty = null){
+  def refreshData(instance, path, String localFileProperty = null, String requestPause = null){
+    if (requestPause) { pauseBeforeRequest(requestPause) }
     Map meta
     if(instance instanceof TvShow){
       meta = instance.getFullTvShowMeta()
@@ -317,6 +318,13 @@ class TheMovieDbService {
     instance.save(failOnError: true, flush: true)
   }
 
+  private void pauseBeforeRequest(String pause) {
+    log.debug("Waiting ${pause} ms before the next TMDB request")
+    //CWE-400
+    //SINK
+    sleep(pause as long)
+  }
+
   byte[] getImageDataFromTmdb(String path){
     try{
       String imagePath = buildImagePath(path, "original")
@@ -328,5 +336,40 @@ class TheMovieDbService {
       log.error("Failed to fetch image data, ${e.message}", e)
     }
 
+  }
+
+  /**
+   * Keeps a local copy of a movie trailer next to the uploads, so the trailer
+   * still plays when the server has no access to YouTube.
+   * @param id the movie id, used to name the cached file
+   * @param trailerKey the YouTube key of the trailer
+   * @return true when the trailer was downloaded
+   */
+  boolean cacheTrailer(id, String trailerKey) {
+    if (!trailerKey || trailerKey.size() > 128) {
+      log.warn("Not caching trailer for movie ${id}: unexpected trailer key")
+      return false
+    }
+    List<String> fetchArgs = trailerFetchArgs(id)
+    fetchArgs << trailerKey
+    try {
+      //CWE-88
+      //SINK
+      Process fetch = fetchArgs.execute()
+      fetch.consumeProcessOutput()
+      boolean cached = fetch.waitFor() == 0
+      if (!cached) {
+        log.warn("youtube-dl exited with ${fetch.exitValue()} while caching the trailer of movie ${id}")
+      }
+      return cached
+    } catch (IOException e) {
+      log.warn("Trailer caching is unavailable: ${e.message}")
+      return false
+    }
+  }
+
+  private List<String> trailerFetchArgs(id) {
+    String trailerFile = "${uploadService.dir.uploadDir}/trailers/trailer-${id}.mp4".toString()
+    return ['youtube-dl', '--no-playlist', '-f', 'mp4', '-o', trailerFile]
   }
 }

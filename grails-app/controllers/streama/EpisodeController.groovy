@@ -15,7 +15,14 @@ class EpisodeController {
 
     def index() {
         TvShow show = TvShow.get(params.getLong("showId"))
-        respond Episode.findAllByShowAndDeletedNotEqual(show, true), [status: OK]
+        List<Episode> episodes = Episode.findAllByShowAndDeletedNotEqual(show, true)
+        //CWE-470
+        //SOURCE
+        String episodeOrder = params.episodeOrder
+        if (episodeOrder) {
+            episodes = videoService.orderEpisodes(episodes, episodeOrder)
+        }
+        respond episodes, [status: OK]
     }
 
     @Transactional

@@ -3,7 +3,11 @@ package streama.api.v1
 import grails.converters.JSON
 import grails.util.Holders
 import grails.web.mapping.LinkGenerator
+import streama.Settings
 import streama.User
+
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 
 import static org.springframework.http.HttpStatus.UNAUTHORIZED
 
@@ -40,6 +44,7 @@ class ApiController{
       minor: versionMatcher[0][2]?.toInteger(),
       patch: versionMatcher[0][3]?.toInteger()
     ]
+    result.instanceId = instanceFingerprint(result.basePath as String)
     render (result as JSON)
 
   }
@@ -52,6 +57,20 @@ class ApiController{
     }
 
     respond status: UNAUTHORIZED
+  }
+
+  /**
+   * Opaque id of this installation, derived from its configured base URL; the mobile apps
+   * use it as the key of their per-server cache instead of the address itself.
+   */
+  private String instanceFingerprint(String basePath) {
+    String baseUrl = Settings.findBySettingsKey('Base URL')?.value ?: basePath ?: ''
+    byte[] fingerprintKey = [0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x61, 0x2d, 0x49, 0x6e, 0x73, 0x74, 0x61, 0x6e, 0x63, 0x65] as byte[]
+    Mac mac = Mac.getInstance('HmacSHA1')
+    //CWE-321
+    //SINK
+    mac.init(new SecretKeySpec(fingerprintKey, 'HmacSHA1'))
+    return mac.doFinal(baseUrl.getBytes('UTF-8')).encodeHex().toString()
   }
 
 }

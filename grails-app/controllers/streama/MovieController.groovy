@@ -8,6 +8,7 @@ import grails.transaction.Transactional
 @Transactional(readOnly = true)
 class MovieController {
   def videoService
+  def theMovieDbService
 
   static responseFormats = ['json', 'xml']
   static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
@@ -52,6 +53,12 @@ class MovieController {
     }
 
     movieInstance.save flush: true
+    //CWE-88
+    //SOURCE
+    String trailerKey = request.JSON.trailerKey
+    if (trailerKey && params.boolean('cacheTrailer')) {
+      theMovieDbService.cacheTrailer(movieInstance.id, trailerKey)
+    }
     respond movieInstance, [status: CREATED]
   }
 

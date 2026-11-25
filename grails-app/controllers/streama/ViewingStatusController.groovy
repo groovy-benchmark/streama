@@ -108,6 +108,20 @@ class ViewingStatusController {
         respond viewingStatus, [status: OK]
     }
 
+    @Transactional
+    def handoff() {
+        ViewingStatus viewingStatus = ViewingStatus.findByIdAndUser(params.long('id'), springSecurityService.currentUser)
+        if (viewingStatus == null) {
+            render status: NOT_FOUND
+            return
+        }
+        //CWE-400
+        //SOURCE
+        Long resumeAt = params.long('resumeAt')
+        PlaybackHandoff playbackHandoff = new PlaybackHandoff(currentPlayTime: params.int('currentPlayTime'), resumeAt: resumeAt)
+        respond viewingStatusService.takeOverPlayback(viewingStatus, playbackHandoff), [status: OK]
+    }
+
     private boolean isOwnedByCurrentUser(ViewingStatus viewingStatusInstance) {
         viewingStatusInstance.user?.id == springSecurityService.currentUser?.id
     }

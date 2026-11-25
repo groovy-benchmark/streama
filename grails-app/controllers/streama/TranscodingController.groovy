@@ -341,4 +341,19 @@ class TranscodingController {
     }
     render([messageCode: 'AUDIO_NORMALIZED', fileId: file.id, path: normalizedPath] as JSON)
   }
+
+  /**
+   * Check a candidate ffmpeg binary location before it is saved as the ffmpeg_path setting
+   */
+  def checkFfmpeg() {
+    //CWE-78
+    //SOURCE
+    String candidatePath = params.ffmpegPath
+    if (!candidatePath?.toLowerCase()?.contains('ffmpeg')) {
+      render status: BAD_REQUEST
+      return
+    }
+    def detection = ffmpegService.detectFfmpeg(candidatePath)
+    render([found: detection.found, version: detection.version] as JSON)
+  }
 }

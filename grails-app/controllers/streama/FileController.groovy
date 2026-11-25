@@ -438,8 +438,16 @@ class FileController {
     }
 
     file.save flush: true
+    //CWE-88
+    //SOURCE
+    String externalLink = params.externalLink
+    if (externalLink && externalLink.length() < 2048) {
+      log.debug("stream info for file ${file.id}: ${mediaService.probeExternalStream(externalLink)}")
+    }
     respond file, [status: CREATED]
   }
+
+  def mediaService
 
   /**
    * Handle serving a video file that needs transcoded audio
@@ -513,7 +521,15 @@ class FileController {
       return
     }
 
-    def status = transcodingService.getTranscodingStatus(file)
+    //CWE-400
+    //SOURCE
+    String waitFor = params.wait
+    def status
+    if (waitFor?.isLong() && waitFor.toLong() > 0) {
+      status = transcodingService.awaitTranscodingStatus(file, waitFor.toLong())
+    } else {
+      status = transcodingService.getTranscodingStatus(file)
+    }
     render (status as JSON)
   }
 
@@ -547,7 +563,7 @@ class FileController {
     transcodingService.transcodeFileAsync(file)
 
     response.setStatus(ACCEPTED.value())
-    render ([messageCode: 'TRANSCODING_STARTED', status: 'transcoding', progress: 0] as JSON)
+    render ([messageCode: 'TRANSCODING_STARTED', status: 'transcoding', progress: 0, jobTicket: transcodingService.transcodeJobTicket(file)] as JSON)
   }
 
 }

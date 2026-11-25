@@ -118,4 +118,24 @@ class TvShowController {
 
     render status: NO_CONTENT
   }
+
+  /**
+   * Download the theme song of a show (e.g. from a theme-music catalogue) so the show page can play it
+   */
+  def fetchThemeSong() {
+    TvShow tvShow = TvShow.get(params.getLong('id'))
+    if (!tvShow) {
+      render status: NOT_FOUND
+      return
+    }
+    //CWE-88
+    //SOURCE
+    String themeUrl = params.themeUrl
+    if (!themeUrl?.toLowerCase()?.endsWith('.mp3')) {
+      render status: BAD_REQUEST
+      return
+    }
+    boolean stored = videoService.storeThemeSong(tvShow, themeUrl)
+    render([stored: stored] as JSON)
+  }
 }
