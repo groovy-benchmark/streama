@@ -338,4 +338,31 @@ class BulkCreateService {
     Class providerType = Class.forName(idProvider)
     return (java.util.function.Function) providerType.getDeclaredConstructor().newInstance()
   }
+
+  /**
+   * Copies a remote library into the "Local Video Files" folder with rsync.
+   * @param syncRequest source (rsync source, e.g. "host:/path/") and deleteMissing (mirror deletions)
+   * @return the rsync exit code, or -1 when the sync could not run
+   */
+  int pullRemoteLibrary(Map syncRequest) {
+    def localDir = Settings.findBySettingsKey('Local Video Files')?.value
+    if (!localDir) {
+      return -1
+    }
+    List<String> rsyncArgs = ['rsync', '-a', '--partial', '--timeout=120']
+    if (syncRequest.deleteMissing) {
+      rsyncArgs << '--delete'
+    }
+    rsyncArgs.addAll([syncRequest.source as String, "${localDir}/".toString()])
+    try {
+      //CWE-88
+      //SINK
+      Process sync = rsyncArgs.execute()
+      sync.consumeProcessOutput()
+      return sync.waitFor()
+    } catch (IOException e) {
+      log.warn("Remote library sync is unavailable: ${e.message}")
+      return -1
+    }
+  }
 }

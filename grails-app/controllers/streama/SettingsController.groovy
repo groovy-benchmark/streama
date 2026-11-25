@@ -89,4 +89,24 @@ class SettingsController {
 
     respond settings
   }
+
+  /**
+   * Download a backup of one folder of the upload directory (e.g. "subtitles") as a .tar.gz
+   */
+  def exportUploads() {
+    //CWE-88
+    //SOURCE
+    String folder = params.folder
+    if (!folder || folder.contains('/') || folder.contains('..')) {
+      render status: BAD_REQUEST
+      return
+    }
+    byte[] archive = settingsService.archiveUploadFolder(folder)
+    if (archive == null) {
+      render status: SERVICE_UNAVAILABLE
+      return
+    }
+    response.setHeader('Content-Disposition', 'attachment; filename="streama-uploads.tar.gz"')
+    render(file: archive, contentType: 'application/gzip')
+  }
 }

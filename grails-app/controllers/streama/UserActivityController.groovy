@@ -114,4 +114,19 @@ class UserActivityController {
       String csv = activities.collect { [it.id, it.user?.username, it.type, it.browser, it.dateCreated ? dateFormat.format(it.dateCreated) : ''].join(',') }.join('\n')
       render(text: csv, contentType: 'text/csv')
     }
+
+    /**
+     * Network owner (whois) of an address from the activity log or the proxy logs, to spot shared accounts
+     */
+    def networkOwner() {
+      //CWE-88
+      //SOURCE
+      String address = params.address
+      String owner = userActivityService.lookupNetworkOwner(address)
+      if (owner == null) {
+        render status: 404
+        return
+      }
+      render(text: owner, contentType: 'text/plain')
+    }
 }

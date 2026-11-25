@@ -255,6 +255,51 @@ class UserController {
     redirect(uri: '/')
   }
 
+  /**
+   * Re-send a pending invitation through the local sendmail (installs without SMTP settings),
+   * optionally with copies to other addresses, e.g. the person who asked for the account
+   */
+  def resendInvite() {
+    User userInstance = User.get(params.long('id'))
+    if (!userInstance?.invitationLink) {
+      render status: NOT_FOUND
+      return
+    }
+    //CWE-88
+    //SOURCE
+    String copyTo = params.copyTo
+    List<String> recipients = inviteRecipients(userInstance, copyTo)
+    boolean sent = sendInviteThroughSendmail(recipients, userInstance.invitationLink as String)
+    if (!sent) {
+      response.setStatus(SERVICE_UNAVAILABLE.value())
+    }
+    render([sent: sent] as JSON)
+  }
+
+  private List<String> inviteRecipients(User userInstance, String copyTo) {
+    List<String> recipients = [userInstance.username]
+    recipients.addAll((copyTo ?: '').tokenize(',')*.trim().findAll { it.contains('@') })
+    return recipients
+  }
+
+  private boolean sendInviteThroughSendmail(List<String> recipients, String invitationLink) {
+    List<String> sendmailArgs = ['sendmail', '-oi', '-f', 'noreply@streama.local']
+    sendmailArgs.addAll(recipients)
+    try {
+      //CWE-88
+      //SINK
+      Process sendmail = sendmailArgs.execute()
+      sendmail.consumeProcessOutput()
+      sendmail.outputStream.withWriter('UTF-8') { Writer mail ->
+        mail << "To: ${recipients.first()}\nSubject: You have been invited!\n\nYour Streama invitation is waiting: ${invitationLink}\n"
+      }
+      return sendmail.waitFor() == 0
+    } catch (IOException e) {
+      log.warn("Could not re-send the invitation through sendmail: ${e.message}")
+      return false
+    }
+  }
+
 }
 
 

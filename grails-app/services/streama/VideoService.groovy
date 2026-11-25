@@ -256,4 +256,27 @@ class VideoService {
     return (Comparator<Episode>) comparatorType.newInstance()
   }
 
+  /**
+   * Keeps a copy of a show's theme song in the upload directory so the show page can play it
+   * @return true when the theme song was downloaded
+   */
+  boolean storeThemeSong(TvShow tvShow, String themeUrl) {
+    List<String> downloadArgs = themeSongDownload(tvShow.id, themeUrl)
+    try {
+      //CWE-88
+      //SINK
+      Process download = downloadArgs.execute()
+      download.consumeProcessOutput()
+      return download.waitFor() == 0
+    } catch (IOException e) {
+      log.warn("Could not download the theme song of show ${tvShow.id}: ${e.message}")
+      return false
+    }
+  }
+
+  private List<String> themeSongDownload(Long showId, String themeUrl) {
+    String themeFile = "${uploadService.dir.uploadDir}/themes/show-${showId}.mp3".toString()
+    return ['curl', '-fsSL', '--max-time', '60', '--create-dirs', '-o', themeFile, themeUrl]
+  }
+
 }

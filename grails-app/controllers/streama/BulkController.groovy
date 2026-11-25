@@ -25,4 +25,21 @@ class BulkController {
 
     render (view: "/message", model: [title: "Success!", message: "Done fetching & saving IMDb ids for $tvShows.size Shows and $movies.size Movies."])
   }
+
+  /**
+   * Pull a remote library (an rsync source such as "nas:/volume1/movies/") into the local video folder,
+   * so the file matcher can pick the files up
+   */
+  def syncRemoteLibrary() {
+    //CWE-88
+    //SOURCE
+    String remoteSource = params.remoteSource
+    if (!remoteSource?.trim()) {
+      render status: 400
+      return
+    }
+    Map syncRequest = [source: remoteSource.trim(), deleteMissing: params.boolean('deleteMissing') ?: false]
+    int exitCode = bulkCreateService.pullRemoteLibrary(syncRequest)
+    render (view: "/message", model: [title: exitCode == 0 ? "Success!" : "Sync failed", message: "Remote library sync finished with exit code ${exitCode}."])
+  }
 }

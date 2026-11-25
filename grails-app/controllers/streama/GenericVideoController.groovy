@@ -79,4 +79,19 @@ class GenericVideoController {
             respond genericVideoInstance, [status: OK]
 
     }
+
+    /**
+     * Container summary of a remote source (e.g. an IPTV or NAS stream link) before it is added as a generic video
+     */
+    def inspectSource() {
+        //CWE-88
+        //SOURCE
+        String sourceUrl = request.JSON.sourceUrl
+        if (!sourceUrl?.trim()) {
+            render status: BAD_REQUEST
+            return
+        }
+        Map mediaInfo = VideoHelper.remoteMediaInfo(sourceUrl)
+        render(mediaInfo as JSON)
+    }
 }

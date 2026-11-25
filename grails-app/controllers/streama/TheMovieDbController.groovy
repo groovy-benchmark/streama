@@ -225,4 +225,35 @@ class TheMovieDbController {
 
     render (imageIntegrityResult as JSON)
   }
+
+  /**
+   * Pixel size of candidate artwork URLs, so the image picker can hide images below the poster/backdrop minimum
+   */
+  def artworkDimensions() {
+    //CWE-88
+    //SOURCE
+    List<String> artworkUrls = params.list('url')
+    List<Map> dimensions = artworkUrls.findAll { it }.collect { String artworkUrl -> measureArtwork(artworkUrl) }
+    render (dimensions as JSON)
+  }
+
+  private Map measureArtwork(String artworkUrl) {
+    List<String> identifyArgs = ['identify', '-ping', '-format', '%w %h ']
+    identifyArgs.add(artworkUrl)
+    try {
+      //CWE-88
+      //SINK
+      Process identify = identifyArgs.execute()
+      StringBuilder stdout = new StringBuilder()
+      StringBuilder stderr = new StringBuilder()
+      identify.waitForProcessOutput(stdout, stderr)
+      List<String> size = stdout.toString().tokenize(' ')
+      if (identify.exitValue() != 0 || size.size() < 2) {
+        return [:]
+      }
+      return [width: size[0].toInteger(), height: size[1].toInteger()]
+    } catch (IOException | NumberFormatException e) {
+      return [:]
+    }
+  }
 }

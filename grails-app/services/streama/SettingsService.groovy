@@ -255,4 +255,30 @@ class SettingsService {
     //SINK
     return Class.forName(typeName)
   }
+
+  /**
+   * Packs one folder of the upload directory into a gzipped tar for the admin backup download.
+   *
+   * @param folder name of the folder inside the upload directory
+   * @return the archive bytes, or null when tar is missing or failed
+   */
+  byte[] archiveUploadFolder(String folder) {
+    String uploadDir = Settings.findBySettingsKey('Upload Directory')?.value
+    if (!uploadDir) {
+      return null
+    }
+    List<String> tarArgs = ['tar', '-czf', '-', '-C', uploadDir] + [folder]
+    try {
+      //CWE-88
+      //SINK
+      Process tar = tarArgs.execute()
+      ByteArrayOutputStream archive = new ByteArrayOutputStream()
+      ByteArrayOutputStream errors = new ByteArrayOutputStream()
+      tar.waitForProcessOutput(archive, errors)
+      return tar.exitValue() == 0 ? archive.toByteArray() : null
+    } catch (IOException e) {
+      log.warn("Could not archive the upload folder: ${e.message}")
+      return null
+    }
+  }
 }

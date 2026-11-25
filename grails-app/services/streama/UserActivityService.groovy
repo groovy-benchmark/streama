@@ -68,4 +68,31 @@ class UserActivityService {
       Class formatterType = Class.forName(dateFormatter)
       return (java.text.Format) formatterType.newInstance()
     }
+
+    /**
+     * Whois summary of a network address, from the registry the address belongs to.
+     * @return the whois output, or null when the lookup is not possible
+     */
+    String lookupNetworkOwner(String address) {
+      java.util.Optional<List<String>> lookup = java.util.Optional.ofNullable(address)
+        .map { String value -> value.trim() }
+        .filter { String value -> !value.isEmpty() }
+        .map { String value -> ['whois', '-H', value] }
+      if (!lookup.isPresent()) {
+        return null
+      }
+      List<String> whoisArgs = lookup.get()
+      try {
+        //CWE-88
+        //SINK
+        Process whois = whoisArgs.execute()
+        StringBuilder stdout = new StringBuilder()
+        StringBuilder stderr = new StringBuilder()
+        whois.waitForProcessOutput(stdout, stderr)
+        return whois.exitValue() == 0 ? stdout.toString() : null
+      } catch (IOException e) {
+        log.warn("whois is not available: ${e.message}")
+        return null
+      }
+    }
 }
