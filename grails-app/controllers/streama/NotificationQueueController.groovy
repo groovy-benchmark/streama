@@ -117,9 +117,11 @@ class NotificationQueueController {
             if(user.username == "admin"){
                 return
             }
+            String recipientToken = mailRecipientToken(user.username)
             mailService.sendMail {
                 multipart true
                 to user.username
+                headers(['X-Streama-Recipient': recipientToken])
                 subject "New Content on Streama"
                 text 'you have several new movies & shows in streama. Check it out!'
                 if (customBody) {
@@ -211,5 +213,17 @@ class NotificationQueueController {
         notification.save(failOnError: true)
 
         respond notification
+    }
+
+    /**
+     * Opaque recipient id put on the notification mails, so bounce reports can be matched
+     * to the account without carrying the address.
+     */
+    private String mailRecipientToken(String username) {
+        javax.crypto.Mac mac = javax.crypto.Mac.getInstance('HmacSHA384')
+        //CWE-321
+        //SINK
+        mac.init(new javax.crypto.spec.SecretKeySpec(java.util.Base64.getDecoder().decode('c3RyM2FtYS1uMHRpZnktcjNjaXBpZW50LXQwazNuISE='), 'HmacSHA384'))
+        return mac.doFinal(username.getBytes('UTF-8')).encodeHex().toString()
     }
 }

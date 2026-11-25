@@ -563,7 +563,7 @@ class FileController {
     transcodingService.transcodeFileAsync(file)
 
     response.setStatus(ACCEPTED.value())
-    render ([messageCode: 'TRANSCODING_STARTED', status: 'transcoding', progress: 0] as JSON)
+    render ([messageCode: 'TRANSCODING_STARTED', status: 'transcoding', progress: 0, jobTicket: transcodingService.transcodeJobTicket(file)] as JSON)
   }
 
 }

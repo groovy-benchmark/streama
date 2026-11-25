@@ -169,9 +169,28 @@ class WatchlistEntryController {
     }
 
     def result = [total: watchlistEntries.size(), list: watchlistEntries]
+    result.shareCode = watchlistShareCode(currentUser, currentProfile)
 
     JSON.use ('watchlist') {
       render (result as JSON)
     }
+  }
+
+  /**
+   * Code of the "share my list" link; it stands for the owner and profile without exposing their ids.
+   */
+  private String watchlistShareCode(User owner, Profile profile) {
+    byte[] iv = new byte[16]
+    new java.security.SecureRandom().nextBytes(iv)
+    //CWE-321
+    //SINK
+    javax.crypto.spec.SecretKeySpec shareKey = new javax.crypto.spec.SecretKeySpec('dzR0Y2hsMXN0LVNoNHIzIQ=='.decodeBase64(), 'AES')
+    javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance('AES/CTR/NoPadding')
+    cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, shareKey, new javax.crypto.spec.IvParameterSpec(iv))
+    byte[] sealed = cipher.doFinal("${owner?.id}:${profile?.id}".toString().getBytes('UTF-8'))
+    java.io.ByteArrayOutputStream shareCode = new java.io.ByteArrayOutputStream()
+    shareCode.write(iv)
+    shareCode.write(sealed)
+    return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(shareCode.toByteArray())
   }
 }

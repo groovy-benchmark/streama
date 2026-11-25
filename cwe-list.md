@@ -372,3 +372,51 @@ Source/Sink:
 [MediaResponseHeadersFilter.groovy:21](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/src/main/groovy/streama/MediaResponseHeadersFilter.groovy#L21)
 
 Note: engineered host: engineered host: streama has no servlet filter for external-player responses; MediaResponseHeadersFilter (javax.servlet.Filter whose init configures the session cookie) was created and declared as a bean in resources.groovy.
+
+
+CWE-321
+Example 3
+Source/Sink:
+[WebsocketController.groovy:47](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/WebsocketController.groovy#L47)
+
+
+CWE-321
+Example 4
+Source/Sink:
+[ApiController.groovy:72](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/api/v1/ApiController.groovy#L72)
+
+
+CWE-321
+Example 5
+Source/Sink:
+[WatchlistEntryController.groovy:187](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/WatchlistEntryController.groovy#L187)
+
+
+CWE-321
+Example 6
+Source/Sink:
+[NotificationQueueController.groovy:226](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/NotificationQueueController.groovy#L226)
+
+
+CWE-321
+Example 7
+Source/Sink:
+[UserActivityController.groovy:96](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/UserActivityController.groovy#L96)
+
+
+CWE-321
+Example 8
+Source/Sink:
+[PlayerService.groovy:83](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/services/streama/PlayerService.groovy#L83)
+
+
+CWE-321
+Example 9
+Source/Sink:
+[TranscodingService.groovy:492](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/services/streama/TranscodingService.groovy#L492)
+
+
+CWE-321
+Example 10
+Source/Sink:
+[SubtitlesController.groovy:121](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/SubtitlesController.groovy#L121)

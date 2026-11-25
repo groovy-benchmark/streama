@@ -478,4 +478,22 @@ class TranscodingService {
     //SINK
     sleep(waitMs as long)
   }
+
+  /**
+   * Opaque ticket of a started transcoding job; the player keeps it to pick up the job's
+   * progress again after a page reload.
+   */
+  String transcodeJobTicket(File file) {
+    byte[] nonce = new byte[12]
+    new java.security.SecureRandom().nextBytes(nonce)
+    javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance('AES/GCM/NoPadding')
+    //CWE-321
+    //SINK
+    cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, new javax.crypto.spec.SecretKeySpec('Tr4nsc0d3-T1ck3t'.bytes, 'AES'), new javax.crypto.spec.GCMParameterSpec(128, nonce))
+    byte[] sealed = cipher.doFinal("${file.id}:${System.currentTimeMillis()}".toString().getBytes('UTF-8'))
+    java.io.ByteArrayOutputStream ticket = new java.io.ByteArrayOutputStream()
+    ticket.write(nonce)
+    ticket.write(sealed)
+    return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(ticket.toByteArray())
+  }
 }

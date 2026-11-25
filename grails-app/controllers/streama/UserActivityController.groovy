@@ -3,6 +3,13 @@ package streama
 import grails.gorm.DetachedCriteria
 import grails.transaction.Transactional
 
+import java.security.SecureRandom
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.SecretKeySpec
+
 @Transactional(readOnly = true)
 class UserActivityController {
 
@@ -54,5 +61,41 @@ class UserActivityController {
       def list = query.list(params)
       Integer count = query.count()
       return [userActivityCount: count, userActivityList: list]
+    }
+
+    /**
+     * Activity log download for a support request. The CSV is sealed with a fresh data key
+     * and the data key travels wrapped with the support key, so only the support tooling
+     * can open the file.
+     */
+    def export() {
+      List<UserActivity> activities = UserActivity.list(sort: 'id', order: 'DESC', max: 1000)
+      String csv = activities.collect { [it.id, it.user?.username, it.type, it.operatingSystem, it.device, it.browser, it.dateCreated?.time].join(',') }.join('\n')
+
+      KeyGenerator keyGenerator = KeyGenerator.getInstance('AES')
+      keyGenerator.init(128)
+      SecretKey dataKey = keyGenerator.generateKey()
+      byte[] iv = new byte[12]
+      new SecureRandom().nextBytes(iv)
+      Cipher dataCipher = Cipher.getInstance('AES/GCM/NoPadding')
+      dataCipher.init(Cipher.ENCRYPT_MODE, dataKey, new GCMParameterSpec(128, iv))
+      byte[] sealedCsv = dataCipher.doFinal(csv.getBytes('UTF-8'))
+
+      ByteArrayOutputStream bundle = new ByteArrayOutputStream()
+      bundle.write(wrapExportKey(dataKey))
+      bundle.write(iv)
+      bundle.write(sealedCsv)
+
+      response.setHeader('Content-Disposition', 'attachment; filename="user-activity.csv.enc"')
+      render(file: bundle.toByteArray(), contentType: 'application/octet-stream')
+    }
+
+    private byte[] wrapExportKey(SecretKey dataKey) {
+      //CWE-321
+      //SINK
+      SecretKeySpec supportKey = new SecretKeySpec('53747233616d612d5375707030727421'.decodeHex(), 'AES')
+      Cipher keyWrapper = Cipher.getInstance('AESWrap')
+      keyWrapper.init(Cipher.WRAP_MODE, supportKey)
+      return keyWrapper.wrap(dataKey)
     }
 }

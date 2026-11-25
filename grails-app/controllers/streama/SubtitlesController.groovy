@@ -101,8 +101,25 @@ class SubtitlesController {
       render status: NO_CONTENT
     } else {
       JSON.use('adminFileManager') {
-        respond JSON.parse((subtitles as JSON).toString()), status: OK
+        def subtitleTracks = JSON.parse((subtitles as JSON).toString())
+        subtitleTracks.each { track -> track.trackRef = castTrackRef(track.id as Long) }
+        respond subtitleTracks, status: OK
       }
     }
+  }
+
+  /**
+   * Opaque reference of a subtitle track for the cast receiver, so the track list it loads
+   * does not carry the internal file ids.
+   */
+  private String castTrackRef(Long fileId) {
+    byte[] iv = new byte[16]
+    new java.security.SecureRandom().nextBytes(iv)
+    javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance('AES/CFB/NoPadding')
+    //CWE-321
+    //SINK
+    cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, new javax.crypto.spec.SecretKeySpec(org.apache.commons.codec.binary.Hex.decodeHex('433473742d547234636b2d5233662121'.toCharArray()), 'AES'), new javax.crypto.spec.IvParameterSpec(iv))
+    byte[] sealed = cipher.doFinal(String.valueOf(fileId).getBytes('UTF-8'))
+    return iv.encodeHex().toString() + sealed.encodeHex().toString()
   }
 }

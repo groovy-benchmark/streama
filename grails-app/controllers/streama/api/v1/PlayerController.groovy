@@ -23,6 +23,7 @@ class PlayerController {
       render(text: playerService.loadSidecarSubtitle(videoInstance, sidecarName), contentType: 'text/plain')
       return
     }
+    response.setHeader('X-Playback-Session', playerService.playbackSessionToken(videoInstance))
     JSON.use('player') {
       render (videoInstance as JSON)
     }

@@ -66,4 +66,22 @@ class PlayerService {
         return new java.io.File(sidecarPath).text
     }
 
+    private static final byte[] PLAYBACK_SESSION_KEY = 'pl4yb4ck-s3ss10n-k3y'.getBytes('UTF-8')
+
+    /**
+     * Signed playback session handed to the player together with the video, so the
+     * viewing-status updates it sends back can be tied to the video that was opened.
+     *
+     * @param video the video being played
+     * @return "<userId>:<videoId>:<openedAt>.<signature>"
+     */
+    String playbackSessionToken(Video video) {
+        String session = "${springSecurityService.currentUserId}:${video.id}:${System.currentTimeMillis()}".toString()
+        javax.crypto.Mac mac = javax.crypto.Mac.getInstance('HmacSHA256')
+        //CWE-321
+        //SINK
+        mac.init(new javax.crypto.spec.SecretKeySpec(PLAYBACK_SESSION_KEY, 'HmacSHA256'))
+        return session + '.' + mac.doFinal(session.getBytes('UTF-8')).encodeHex().toString()
+    }
+
 }
