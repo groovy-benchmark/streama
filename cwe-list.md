@@ -310,3 +310,65 @@ step 5:
 
 Sink:
 [ViewingStatusService.groovy:102](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/services/streama/ViewingStatusService.groovy#L102)
+
+
+CWE-614
+Example 3
+Source/Sink:
+[LegacyPlayerSessionInitializer.groovy:19](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/src/main/groovy/streama/LegacyPlayerSessionInitializer.groovy#L19)
+
+Note: engineered host: engineered host: streama has no startup-time servlet configuration component for player compatibility; LegacyPlayerSessionInitializer (Spring Boot ServletContextInitializer) was created and declared as a bean in Application.doWithSpring().
+
+
+CWE-614
+Example 4
+Source/Sink:
+[CastReceiverContainerCustomizer.groovy:25](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/src/main/groovy/streama/CastReceiverContainerCustomizer.groovy#L25)
+
+Note: engineered host: engineered host: streama has no embedded-container customization for cast receivers; CastReceiverContainerCustomizer (Spring Boot EmbeddedServletContainerCustomizer adding a ServletContextInitializer) was created and declared in grails-app/conf/spring/resources.groovy.
+
+
+CWE-614
+Example 5
+Source/Sink:
+[MediaServerModeInitializer.groovy:35](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/src/main/groovy/streama/MediaServerModeInitializer.groovy#L35)
+
+Note: engineered host: engineered host: streama has no Tomcat-level startup hook for the LAN media-server mode; MediaServerModeInitializer (EmbeddedServletContainerCustomizer + TomcatContextCustomizer registering itself as a javax.servlet.ServletContainerInitializer) was created and declared in resources.groovy.
+
+
+CWE-614
+Example 6
+Source/Sink:
+[RemoteAccessSessionListener.groovy:23](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/src/main/groovy/streama/RemoteAccessSessionListener.groovy#L23)
+
+Note: engineered host: engineered host: streama has no servlet listener for remote (reverse-proxy) access; RemoteAccessSessionListener (ServletContextListener) plus RemoteAccessTomcatCustomizer (declares it with Context.addApplicationListener) were created in one new file and the customizer was declared in resources.groovy.
+
+
+CWE-614
+Example 7
+Source/Sink:
+[TvClientTomcatSupport.groovy:30](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/src/main/groovy/streama/TvClientTomcatSupport.groovy#L30)
+
+Note: engineered host: engineered host: streama has no Tomcat lifecycle hook for TV clients; TvClientTomcatSupport (EmbeddedServletContainerCustomizer + Tomcat LifecycleListener handling configure_start) was created and declared in resources.groovy.
+
+
+CWE-614
+Example 8
+Source/Sink:
+[Application.groovy:68](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/init/streama/Application.groovy#L68)
+
+
+CWE-614
+Example 9
+Source/Sink:
+[StompSessionConfiguration.groovy:27](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/src/main/groovy/streama/StompSessionConfiguration.groovy#L27)
+
+Note: engineered host: engineered host: streama has no Spring configuration for its STOMP/SockJS sessions; StompSessionConfiguration (@Configuration with a ServletContextInitializer @Bean) was created and imported with @Import on Application.
+
+
+CWE-614
+Example 10
+Source/Sink:
+[MediaResponseHeadersFilter.groovy:21](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/src/main/groovy/streama/MediaResponseHeadersFilter.groovy#L21)
+
+Note: engineered host: engineered host: streama has no servlet filter for external-player responses; MediaResponseHeadersFilter (javax.servlet.Filter whose init configures the session cookie) was created and declared as a bean in resources.groovy.
