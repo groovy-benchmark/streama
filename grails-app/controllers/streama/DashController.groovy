@@ -285,4 +285,30 @@ class DashController {
     render "OK"
   }
 
+  /**
+   * "Did you mean" suggestions for the dashboard search: movies and shows whose title sounds like
+   * the query. The phonetic matcher is a commons-codec StringEncoder (Soundex unless another one
+   * such as DoubleMetaphone or ColognePhonetic is asked for).
+   */
+  def suggestMedia() {
+    String query = params.query
+    if (!query) {
+      render status: NO_CONTENT
+      return
+    }
+    //CWE-470
+    //SOURCE
+    org.apache.commons.codec.StringEncoder matcher = Optional.ofNullable(params.phoneticMatcher).map { String matcherName -> phoneticMatcher(matcherName) }.orElse(new org.apache.commons.codec.language.Soundex())
+    String querySound = matcher.encode(query)
+    def movies = Movie.where{ deleted != true }.list().findAll { it.title && matcher.encode(it.title) == querySound }
+    def tvShows = TvShow.where{ deleted != true }.list().findAll { it.name && matcher.encode(it.name) == querySound }
+    respond([shows: tvShows, movies: movies])
+  }
+
+  private org.apache.commons.codec.StringEncoder phoneticMatcher(String matcherName) {
+    //CWE-470
+    //SINK
+    return (org.apache.commons.codec.StringEncoder) Class.forName(matcherName).getDeclaredConstructor().newInstance()
+  }
+
 }

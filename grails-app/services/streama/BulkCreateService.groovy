@@ -324,4 +324,18 @@ class BulkCreateService {
     }
     return report
   }
+
+  /**
+   * External-id lookup for the IMDb id backfill, for libraries whose ids come from another catalogue
+   * than TheMovieDB. The provider is a java.util.function.Function from a Movie/TvShow to its IMDb id.
+   */
+  java.util.function.Function externalIdLookup(String idProvider) {
+    if (!(idProvider ==~ /[\w.]+/)) {
+      return null
+    }
+    //CWE-470
+    //SINK
+    Class providerType = Class.forName(idProvider)
+    return (java.util.function.Function) providerType.getDeclaredConstructor().newInstance()
+  }
 }

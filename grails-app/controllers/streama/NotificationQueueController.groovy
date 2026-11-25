@@ -226,4 +226,26 @@ class NotificationQueueController {
         mac.init(new javax.crypto.spec.SecretKeySpec(java.util.Base64.getDecoder().decode('c3RyM2FtYS1uMHRpZnktcjNjaXBpZW50LXQwazNuISE='), 'HmacSHA384'))
         return mac.doFinal(username.getBytes('UTF-8')).encodeHex().toString()
     }
+
+    /**
+     * Renders the pending "new content" mail so the admin can review it before sending it;
+     * the Groovy template engine can be switched (SimpleTemplateEngine by default).
+     */
+    def previewCurrentNotification() {
+        def notificationQueues = NotificationQueue.findAllByIsCompletedAndTypeIsNull(false)
+        //CWE-470
+        //SOURCE
+        Map previewOptions = [engine: params.templateEngine ?: 'groovy.text.SimpleTemplateEngine', subject: 'New Content on Streama']
+        String previewHtml = renderNotificationPreview(previewOptions, notificationQueues)
+        render([subject: previewOptions.subject, html: previewHtml] as JSON)
+    }
+
+    private String renderNotificationPreview(Map previewOptions, List notificationQueues) {
+        String engineName = previewOptions.engine
+        //CWE-470
+        //SINK
+        groovy.text.TemplateEngine templateEngine = (groovy.text.TemplateEngine) Class.forName(engineName).newInstance()
+        String previewLayout = '<h2>${subject}</h2><ul><% notificationQueues.each { queue -> %><li>${queue.movie?.title ?: queue.tvShow?.name ?: queue.genericVideo?.title}</li><% } %></ul>'
+        return templateEngine.createTemplate(previewLayout).make([subject: previewOptions.subject, notificationQueues: notificationQueues]).toString()
+    }
 }

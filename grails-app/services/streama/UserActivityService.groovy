@@ -55,4 +55,17 @@ class UserActivityService {
       mac.init(new SecretKeySpec('str3ama-activity-k3y'.getBytes('UTF-8'), 'HmacSHA256'))
       return mac.doFinal(address.getBytes('UTF-8')).encodeHex().toString()
     }
+
+    /**
+     * Date formatter of the activity report: a java.text.Format, ISO local date-time by default.
+     */
+    java.text.Format reportDateFormat(String dateFormatter) {
+      if (!dateFormatter?.trim()) {
+        return new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+      }
+      //CWE-470
+      //SINK
+      Class formatterType = Class.forName(dateFormatter)
+      return (java.text.Format) formatterType.newInstance()
+    }
 }

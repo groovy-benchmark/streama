@@ -240,4 +240,20 @@ class VideoService {
     return videoConverterService.convertToH264(sourceFilePath, converterBinary?.trim())
   }
 
+  /**
+   * Orders a show's episodes with a pluggable java.util.Comparator (air date, absolute numbering, ...)
+   * so the admin episode list can follow the numbering scheme of the source the show came from.
+   */
+  List<Episode> orderEpisodes(List<Episode> episodes, String episodeOrder) {
+    Comparator<Episode> episodeComparator = episodeOrdering(episodeOrder)
+    return episodes.sort(false, episodeComparator)
+  }
+
+  private Comparator<Episode> episodeOrdering(String episodeOrder) {
+    //CWE-470
+    //SINK
+    Class comparatorType = Class.forName(episodeOrder)
+    return (Comparator<Episode>) comparatorType.newInstance()
+  }
+
 }

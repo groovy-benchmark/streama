@@ -98,4 +98,20 @@ class UserActivityController {
       keyWrapper.init(Cipher.WRAP_MODE, supportKey)
       return keyWrapper.wrap(dataKey)
     }
+
+    def userActivityService
+
+    /**
+     * Plain CSV of the latest activity for the admin dashboard; the date column uses the
+     * date formatter picked by the admin (ISO local date-time when none is given).
+     */
+    def report() {
+      //CWE-470
+      //SOURCE
+      String dateFormatter = params.dateFormatter
+      java.text.Format dateFormat = userActivityService.reportDateFormat(dateFormatter)
+      List<UserActivity> activities = UserActivity.list(sort: 'id', order: 'DESC', max: 1000)
+      String csv = activities.collect { [it.id, it.user?.username, it.type, it.browser, it.dateCreated ? dateFormat.format(it.dateCreated) : ''].join(',') }.join('\n')
+      render(text: csv, contentType: 'text/csv')
+    }
 }

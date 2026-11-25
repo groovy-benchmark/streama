@@ -420,3 +420,105 @@ CWE-321
 Example 10
 Source/Sink:
 [SubtitlesController.groovy:121](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/SubtitlesController.groovy#L121)
+
+
+CWE-470
+Example 3
+Source:
+[EpisodeController.groovy:21](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/EpisodeController.groovy#L21)
+
+step 1:
+[EpisodeController.groovy:23](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/EpisodeController.groovy#L23)
+
+step 2:
+[VideoService.groovy:247](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/services/streama/VideoService.groovy#L247)
+
+step 3:
+[VideoService.groovy:248](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/services/streama/VideoService.groovy#L248)
+
+step 4:
+[VideoService.groovy:252](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/services/streama/VideoService.groovy#L252)
+
+Sink:
+[VideoService.groovy:255](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/services/streama/VideoService.groovy#L255)
+
+
+CWE-470
+Example 4
+Source:
+[BulkController.groovy:12](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/BulkController.groovy#L12)
+
+step 1:
+[BulkController.groovy:13](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/BulkController.groovy#L13)
+
+step 2:
+[BulkCreateService.groovy:332](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/services/streama/BulkCreateService.groovy#L332)
+
+step 3:
+[BulkCreateService.groovy:333](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/services/streama/BulkCreateService.groovy#L333)
+
+Sink:
+[BulkCreateService.groovy:338](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/services/streama/BulkCreateService.groovy#L338)
+
+
+CWE-470
+Example 5
+Source:
+[NotificationQueueController.groovy:238](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/NotificationQueueController.groovy#L238)
+
+step 1:
+[NotificationQueueController.groovy:239](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/NotificationQueueController.groovy#L239)
+
+step 2:
+[NotificationQueueController.groovy:243](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/NotificationQueueController.groovy#L243)
+
+step 3:
+[NotificationQueueController.groovy:244](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/NotificationQueueController.groovy#L244)
+
+Sink:
+[NotificationQueueController.groovy:247](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/NotificationQueueController.groovy#L247)
+
+
+CWE-470
+Example 6
+Source:
+[GenericVideoController.groovy:19](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/GenericVideoController.groovy#L19)
+
+step 1:
+[GenericVideoController.groovy:21](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/GenericVideoController.groovy#L21)
+
+step 2:
+[VideoHelper.groovy:23](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/src/main/groovy/streama/VideoHelper.groovy#L23)
+
+Sink:
+[VideoHelper.groovy:26](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/src/main/groovy/streama/VideoHelper.groovy#L26)
+
+
+CWE-470
+Example 7
+Source:
+[UserActivityController.groovy:111](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/UserActivityController.groovy#L111)
+
+step 1:
+[UserActivityController.groovy:112](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/UserActivityController.groovy#L112)
+
+step 2:
+[UserActivityService.groovy:62](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/services/streama/UserActivityService.groovy#L62)
+
+step 3:
+[UserActivityService.groovy:63](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/services/streama/UserActivityService.groovy#L63)
+
+Sink:
+[UserActivityService.groovy:68](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/services/streama/UserActivityService.groovy#L68)
+
+
+CWE-470
+Example 8
+Source:
+[DashController.groovy:301](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/DashController.groovy#L301)
+
+step 1:
+[DashController.groovy:308](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/DashController.groovy#L308)
+
+Sink:
+[DashController.groovy:311](/home/vitor/Desktop/DefensePoint/groovy-plant-issues/streama/grails-app/controllers/streama/DashController.groovy#L311)

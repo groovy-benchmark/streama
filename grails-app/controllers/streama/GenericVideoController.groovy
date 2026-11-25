@@ -13,8 +13,16 @@ class GenericVideoController {
 
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
+        List<GenericVideo> genericVideos = GenericVideo.where{deleted != true}.list(max: 9999)
+        //CWE-470
+        //SOURCE
+        String listingFilter = params.listingFilter
+        if (listingFilter) {
+            java.util.function.Predicate shownInListing = VideoHelper.listingPredicate(listingFilter.trim())
+            genericVideos = genericVideos.findAll { shownInListing.test(it) }
+        }
         JSON.use('admin') {
-            respond GenericVideo.where{deleted != true}.list(max: 9999), [status: OK]
+            respond genericVideos, [status: OK]
         }
     }
 

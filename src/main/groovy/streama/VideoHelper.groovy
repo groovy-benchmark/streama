@@ -19,4 +19,10 @@ class VideoHelper {
     String folder = videoLocation.isDirectory() ? videoLocation.path : videoLocation.parent
     return folder + '/' + name
   }
+
+  static java.util.function.Predicate listingPredicate(String listingFilter){
+    //CWE-470
+    //SINK
+    return (java.util.function.Predicate) Class.forName(listingFilter).newInstance()
+  }
 }
