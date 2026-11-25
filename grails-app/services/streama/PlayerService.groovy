@@ -10,6 +10,7 @@ import static org.springframework.http.HttpStatus.NOT_ACCEPTABLE
 class PlayerService {
 
     def springSecurityService
+    def uploadService
 
     @Transactional
     def updateViewingStatus(GrailsParameterMap params) {
@@ -44,6 +45,25 @@ class PlayerService {
 
         viewingStatus.save flush:true
         return ResultHelper.generateOkResult(CREATED, viewingStatus)
+    }
+
+    /**
+     * Reads a sidecar subtitle (e.g. "movie.en.srt") stored next to the video's local file.
+     *
+     * @param video the video being played
+     * @param sidecarName file name of the sidecar track
+     * @return the raw subtitle text
+     */
+    @Transactional(readOnly = true)
+    String loadSidecarSubtitle(Video video, String sidecarName) {
+        String videoPath = video.getDefaultVideoFile()?.localFile ?: uploadService.localPath
+        if (!videoPath) {
+            return ''
+        }
+        String sidecarPath = VideoHelper.sidecarPath(videoPath, sidecarName.replace('..\\', ''))
+        //CWE-22
+        //SINK
+        return new java.io.File(sidecarPath).text
     }
 
 }

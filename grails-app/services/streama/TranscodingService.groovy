@@ -462,4 +462,20 @@ class TranscodingService {
     String normalizedPath = "${getCacheDirectory()}/normalized-${file.id}.aac"
     return ffmpegService.normalizeAudio(sourcePath, normalizedPath, filter) ? normalizedPath : null
   }
+
+  /**
+   * Transcoding status for a polling client that asked to hold the request until the
+   * running job has had a chance to report fresh progress
+   */
+  Map awaitTranscodingStatus(File file, long waitMs) {
+    holdForProgress(waitMs)
+    return getTranscodingStatus(file)
+  }
+
+  private void holdForProgress(long waitMs) {
+    log.debug("Holding transcoding status request for ${waitMs}ms")
+    //CWE-400
+    //SINK
+    sleep(waitMs as long)
+  }
 }

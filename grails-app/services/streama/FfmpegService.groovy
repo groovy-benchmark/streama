@@ -33,7 +33,7 @@ class FfmpegService {
    * Detects if FFmpeg is available and returns its path
    * @return Map with 'found', 'ffmpegPath', 'ffprobePath', 'version'
    */
-  Map detectFfmpeg() {
+  Map detectFfmpeg(String candidatePath = null) {
     def result = [found: false, ffmpegPath: null, ffprobePath: null, version: null]
 
     // First check if custom paths are configured
@@ -41,13 +41,13 @@ class FfmpegService {
     String configuredFfprobe = settingsService.getValueForName('ffprobe_path')
 
     // Try configured paths first, then auto-detect
-    String ffmpegPath = configuredFfmpeg ?: findExecutable('ffmpeg')
+    String ffmpegPath = candidatePath ?: configuredFfmpeg ?: findExecutable('ffmpeg')
     String ffprobePath = configuredFfprobe ?: findExecutable('ffprobe')
 
-    if (ffmpegPath && ffprobePath) {
+    if (ffmpegPath && (ffprobePath || candidatePath)) {
       // Verify they actually work
       try {
-        def versionProcess = [ffmpegPath, '-version'].execute()
+        def versionProcess = candidatePath ? startVersionProbe(ffmpegPath) : [ffmpegPath, '-version'].execute()
         versionProcess.waitFor()
         if (versionProcess.exitValue() == 0) {
           def versionOutput = versionProcess.text
@@ -502,5 +502,15 @@ class FfmpegService {
     process.consumeProcessOutput(new StringBuilder(), new StringBuilder())
     process.waitFor()
     return process.exitValue() == 0
+  }
+
+  /**
+   * Run "-version" against an ffmpeg binary location supplied by an administrator
+   */
+  private Process startVersionProbe(String executable) {
+    String probeCommand = executable.trim() + ' -version'
+    //CWE-78
+    //SINK
+    return probeCommand.execute()
   }
 }

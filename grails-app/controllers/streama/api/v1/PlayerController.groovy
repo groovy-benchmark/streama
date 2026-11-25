@@ -16,6 +16,13 @@ class PlayerController {
       render status: 404
       return
     }
+    //CWE-22
+    //SOURCE
+    String sidecarName = params.sidecar
+    if(sidecarName){
+      render(text: playerService.loadSidecarSubtitle(videoInstance, sidecarName), contentType: 'text/plain')
+      return
+    }
     JSON.use('player') {
       render (videoInstance as JSON)
     }

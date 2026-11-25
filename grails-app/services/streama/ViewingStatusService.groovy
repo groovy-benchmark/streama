@@ -93,4 +93,28 @@ class ViewingStatusService {
 
     return viewingStatus
   }
+
+  ViewingStatus takeOverPlayback(ViewingStatus viewingStatus, PlaybackHandoff handoff) {
+    long handoffLead = leadTimeUntil(handoff.resumeAt)
+    if (handoffLead > 0) {
+      //CWE-400
+      //SINK
+      sleep(handoffLead)
+    }
+    if (handoff.currentPlayTime != null) {
+      viewingStatus.currentPlayTime = handoff.currentPlayTime
+    }
+    viewingStatus.isActive = true
+    viewingStatus.save flush: true
+    return viewingStatus
+  }
+
+  private long leadTimeUntil(Long resumeAt) {
+    return resumeAt ? resumeAt - System.currentTimeMillis() : 0L
+  }
+}
+
+class PlaybackHandoff {
+  Integer currentPlayTime
+  Long resumeAt
 }

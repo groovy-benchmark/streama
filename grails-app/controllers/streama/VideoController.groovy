@@ -266,4 +266,19 @@ class VideoController {
     respond viewingStatus, [status: OK]
   }
 
+  /**
+   * Re-encode one of the video's files to a browser friendly H.264 stream
+   */
+  def convert() {
+    File file = File.get(params.long('fileId'))
+    if (!file) {
+      render status: NOT_FOUND
+      return
+    }
+    //CWE-78
+    //SOURCE
+    String converter = params.converter
+    render([exitCode: videoService.convertForBrowser(file, converter)] as JSON)
+  }
+
 }

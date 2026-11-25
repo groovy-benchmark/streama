@@ -63,10 +63,18 @@ class SettingsController {
 
   @Transactional
   def updateMultiple() {
+    //CWE-470
+    //SOURCE
     def settings = request.JSON
     settings.each{ settingData ->
       Settings settingsInstance = Settings.get(settingData?.id)
       settingsInstance.properties = settingData
+      if (settingData.valueType) {
+        def typedValue = settingsService.coerceSettingValue(settingData.valueType as String, settingData.value as String)
+        if (typedValue == null) {
+          log.warn("Setting ${settingsInstance.settingsKey} does not match its declared type ${settingData.valueType}")
+        }
+      }
       settingsInstance.save failOnError: true
       if (settingsInstance.name == 'anonymous_access') {
         if (Boolean.valueOf(settingData.value)) {

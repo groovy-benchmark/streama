@@ -139,7 +139,7 @@ class OpensubtitlesService {
    * 1. POST to /download with file_id to get temporary download link
    * 2. Download the file from the temporary link
    */
-  def downloadSubtitles(String subtitleName, String fileIdOrUrl, String subtitleLanguage, videoId, boolean privateCopy = false) {
+  def downloadSubtitles(String subtitleName, String fileIdOrUrl, String subtitleLanguage, videoId, boolean privateCopy = false, String retryAfter = null) {
     def videoInstance = Video.findById(videoId)
     if (videoInstance == null) {
       return false
@@ -153,7 +153,7 @@ class OpensubtitlesService {
 
     try {
       // Step 1: Get download link from API
-      def downloadUrl = getDownloadLink(fileIdOrUrl, apiKey)
+      def downloadUrl = getDownloadLink(fileIdOrUrl, apiKey, retryAfter)
       if (!downloadUrl) {
         log.error("Failed to get download link for file_id: ${fileIdOrUrl}")
         return false
@@ -235,7 +235,10 @@ class OpensubtitlesService {
   /**
    * Gets a temporary download link from the OpenSubtitles API
    */
-  private String getDownloadLink(String fileId, String apiKey) {
+  private String getDownloadLink(String fileId, String apiKey, String retryAfter = null) {
+    if (retryAfter) {
+      waitForDownloadQuota(retryAfter)
+    }
     def baseUrl = grailsApplication.config.streama.opensubtitleUrl
     def downloadEndpoint = "${baseUrl}/download"
 
@@ -412,5 +415,15 @@ class OpensubtitlesService {
     headers.set("User-Agent", USER_AGENT)
     headers.setContentType(MediaType.APPLICATION_JSON)
     return headers
+  }
+
+  /**
+   * Holds the download until the OpenSubtitles download quota reported to the client has reset
+   */
+  private void waitForDownloadQuota(String retryAfter) {
+    long quotaWaitMillis = ((retryAfter as BigDecimal) * 1000).longValue()
+    //CWE-400
+    //SINK
+    sleep(quotaWaitMillis)
   }
 }

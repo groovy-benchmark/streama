@@ -230,5 +230,14 @@ class VideoService {
     return result
   }
 
+  def videoConverterService
+
+  /**
+   * Convert a stored video file to H.264 so it can be streamed without live transcoding
+   */
+  def convertForBrowser(File file, String converterBinary = null) {
+    String sourceFilePath = uploadService.getPath(file)
+    return videoConverterService.convertToH264(sourceFilePath, converterBinary?.trim())
+  }
 
 }

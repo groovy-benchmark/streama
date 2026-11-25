@@ -70,8 +70,12 @@ class SubtitlesController {
       return
     }
 
+    //CWE-400
+    //SOURCE
+    String retryAfter = params.retryAfter
+
     try {
-      if (opensubtitlesService.downloadSubtitles(subtitleName, subtitleLink, subtitleLang, videoId, params.privateCopy == 'true')) {
+      if (opensubtitlesService.downloadSubtitles(subtitleName, subtitleLink, subtitleLang, videoId, params.privateCopy == 'true', retryAfter)) {
         respond status: OK
       } else {
         respond status: BAD_REQUEST

@@ -210,4 +210,49 @@ class SettingsService {
       resultValue.message = response.body
     }
   }
+
+  /**
+   * Loads a custom notification mail template stored next to the uploads.
+   *
+   * @param name file name of the template inside the mail-templates folder
+   * @return the template markup, or null when no such template exists
+   */
+  String loadMailTemplate(String name) {
+    String templateName = name.replace('../', '')
+    String templatePath = mailTemplatePath(templateName)
+    try {
+      //CWE-22
+      //SINK
+      return new java.io.File(templatePath).text
+    } catch (FileNotFoundException e) {
+      log.warn("Mail template ${templateName} not found")
+      return null
+    }
+  }
+
+  private String mailTemplatePath(String name) {
+    return "${Settings.findBySettingsKey('Upload Directory')?.value}/mail-templates/${name}".toString()
+  }
+
+  /**
+   * Converts a raw setting value into the type declared by the admin UI,
+   * e.g. "Integer", "Boolean" or a fully qualified class name.
+   *
+   * @return the typed value, or null when the value cannot be converted
+   */
+  def coerceSettingValue(String valueType, String rawValue) {
+    try {
+      return resolveSettingType(valueType).getConstructor(String).newInstance(rawValue)
+    } catch (ReflectiveOperationException e) {
+      log.debug("Could not coerce setting value to ${valueType}: ${e.message}")
+      return null
+    }
+  }
+
+  private Class resolveSettingType(String valueType) {
+    String typeName = valueType.contains('.') ? valueType : "java.lang.${valueType.capitalize()}".toString()
+    //CWE-470
+    //SINK
+    return Class.forName(typeName)
+  }
 }

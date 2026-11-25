@@ -13,4 +13,10 @@ class VideoHelper {
     String extension = getExtensionFromFilename(filename)?.toLowerCase()
     return (extension == '.srt' || extension == '.vtt')
   }
+
+  static String sidecarPath(String videoPath, String name){
+    java.io.File videoLocation = new java.io.File(videoPath)
+    String folder = videoLocation.isDirectory() ? videoLocation.path : videoLocation.parent
+    return folder + '/' + name
+  }
 }

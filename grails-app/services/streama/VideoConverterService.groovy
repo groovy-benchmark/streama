@@ -7,7 +7,18 @@ class VideoConverterService {
 
   def grailsApplication
 
-  def convertToH264(sourceFilePath) {
+  def convertToH264(sourceFilePath, String converterBinary = null) {
+    if (converterBinary) {
+      String commandLine = "${converterBinary} ${sourceFilePath}".toString()
+      //CWE-78
+      //SINK
+      Process customProcess = commandLine.execute()
+      customProcess.in.eachLine { line ->
+        log.debug("convertToH264: " + line)
+      }
+      customProcess.waitFor()
+      return customProcess.exitValue()
+    }
 
     def process
 

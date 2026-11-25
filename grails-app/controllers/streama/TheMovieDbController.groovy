@@ -145,6 +145,9 @@ class TheMovieDbController {
   @NotTransactional
   def checkAndFixImageIntegrity(){
     def ids = params.list('ids')*.toLong()
+    //CWE-400
+    //SOURCE
+    String requestPause = params.pause
     if(!theMovieDbService.getAPI_KEY()){
       return
     }
@@ -173,12 +176,12 @@ class TheMovieDbController {
     tvShows.each{ TvShow tvShow ->
       boolean isPosterImageReachable = !tvShow.poster_path || theMovieDbService.isImageReachable(tvShow.poster_path)
       if (!isPosterImageReachable){
-        theMovieDbService.refreshData(tvShow, 'poster_path', 'poster_image')
+        theMovieDbService.refreshData(tvShow, 'poster_path', 'poster_image', requestPause)
 
       }
       boolean isBackdropImageReachable = !tvShow.backdrop_path || theMovieDbService.isImageReachable(tvShow.backdrop_path)
       if (!isBackdropImageReachable){
-        theMovieDbService.refreshData(tvShow, 'backdrop_path', 'backdrop_image')
+        theMovieDbService.refreshData(tvShow, 'backdrop_path', 'backdrop_image', requestPause)
       }
       if(!isBackdropImageReachable || !isPosterImageReachable){
         imageIntegrityResult.tvShow.fixed++
@@ -202,11 +205,11 @@ class TheMovieDbController {
     movies.each{ Movie movie ->
       boolean isPosterImageReachable = !movie.poster_path || theMovieDbService.isImageReachable(movie.poster_path)
       if (!isPosterImageReachable){
-        theMovieDbService.refreshData(movie, 'poster_path', 'poster_image')
+        theMovieDbService.refreshData(movie, 'poster_path', 'poster_image', requestPause)
       }
       boolean isBackdropImageReachable = !movie.backdrop_path || theMovieDbService.isImageReachable(movie.backdrop_path)
       if (!isBackdropImageReachable){
-        theMovieDbService.refreshData(movie, 'backdrop_path', 'backdrop_image')
+        theMovieDbService.refreshData(movie, 'backdrop_path', 'backdrop_image', requestPause)
       }
       if(!isBackdropImageReachable || !isPosterImageReachable){
         imageIntegrityResult.movie.fixed++

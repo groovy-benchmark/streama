@@ -9,6 +9,7 @@ import grails.transaction.Transactional
 class NotificationQueueController {
 
     def mailService
+    def settingsService
     static responseFormats = ['json', 'xml']
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
@@ -105,6 +106,11 @@ class NotificationQueueController {
             return
         }
 
+        //CWE-22
+        //SOURCE
+        String templateName = params.template
+        String customBody = templateName ? settingsService.loadMailTemplate(templateName) : null
+
         def users = User.findAllByEnabledAndDeleted(true, false)
 
         users.each{ user ->
@@ -116,7 +122,11 @@ class NotificationQueueController {
                 to user.username
                 subject "New Content on Streama"
                 text 'you have several new movies & shows in streama. Check it out!'
-                body(view: "/mail/notification", model: [notificationQueues: notificationQueues])
+                if (customBody) {
+                    html customBody
+                } else {
+                    body(view: "/mail/notification", model: [notificationQueues: notificationQueues])
+                }
             }
         }
 

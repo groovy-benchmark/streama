@@ -8,4 +8,8 @@ beans = {
 
     restTemplate(RestTemplate) {
     }
+
+    streamaContainerSetup(streama.StreamaContainerSetup) {
+        grailsApplication = ref('grailsApplication')
+    }
 }
